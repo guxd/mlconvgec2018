@@ -18,7 +18,11 @@ if [ $# -ge 4 ]; then
 else
     echo "Please specify the paths to the input_file and output directory"
     echo "Usage: `basename $0` <input_file> <output_dir> <gpu-device-num(e.g: 0)> <path to model_file/dir> [optional args: <path-to-reranker-weights> <featuers,e.g:eo,eolm]"   >&2
+    echo "Example: ./run.sh ./data/test/conll14st-test/conll14st-test.tok.src ./outputs/tmmp/ 0 models/mlconv/model1000/checkpoint13.pt"
 fi
+
+
+
 if [[ -d "$model_path" ]]; then
     models=`ls $model_path/*pt | tr '\n' ' ' | sed "s| \([^$]\)| --path \1|g"`
     echo $models
@@ -29,19 +33,18 @@ elif [[ ! -e "$model_path" ]]; then
 fi
 
 
-FAIRSEQPY=$SOFTWARE_DIR/fairseq-py
+FAIRSEQ=$SOFTWARE_DIR/fairseq
 NBEST_RERANKER=$SOFTWARE_DIR/nbest-reranker
 
 
 beam=12
 nbest=$beam
-threads=12
 
 mkdir -p $output_dir
-$SCRIPTS_DIR/apply_bpe.py -c $MODEL_DIR/bpe_model/train.bpe.model < $input_file > $output_dir/input.bpe.txt
+python $SCRIPTS_DIR/apply_bpe.py -c $MODEL_DIR/bpe_model/train.bpe.model < $input_file > $output_dir/input.bpe.txt
 
 # running fairseq on the test data
-CUDA_VISIBLE_DEVICES=$device python3.5 $FAIRSEQPY/generate.py --no-progress-bar --path $models --beam $beam --nbest $beam --interactive --workers $threads $MODEL_DIR/data_bin < $output_dir/input.bpe.txt > $output_dir/output.bpe.nbest.txt
+CUDA_VISIBLE_DEVICES=$device python $FAIRSEQ/generate.py --source-lang src --target-lang trg --no-progress-bar --path $models --beam $beam --nbest $beam $DATA_DIR/processed/bin < $output_dir/input.bpe.txt > $output_dir/output.bpe.nbest.txt
 
 # getting best hypotheses
 cat $output_dir/output.bpe.nbest.txt | grep "^H"  | python -c "import sys; x = sys.stdin.readlines(); x = ' '.join([ x[i] for i in range(len(x)) if(i%$nbest == 0) ]); print(x)" | cut -f3 > $output_dir/output.bpe.txt

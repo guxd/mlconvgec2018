@@ -3,7 +3,7 @@ echo "Downloading Fairseq from https://github.com/shamilcm/fairseq-py (rev:$COMM
 wget https://github.com/shamilcm/fairseq-py/archive/$COMMIT.zip
 unzip $COMMIT.zip
 rm $COMMIT.zip
-mv fairseq-py-$COMMIT fairseq-py
+mv fairseq-py-$COMMIT fairseq
 
 COMMIT=b9453d5a211fc8f90fb25a584b39d4784f8de716
 echo "Downloading n-best reranker from https://github.com/nusnlp/nbest-reranker (rev: $COMMIT)"

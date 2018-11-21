@@ -24,14 +24,16 @@ argparse.open = open
 
 # python 2/3 compatibility
 if sys.version_info < (3, 0):
-    sys.stderr = codecs.getwriter('UTF-8')(sys.stderr)
-    sys.stdout = codecs.getwriter('UTF-8')(sys.stdout)
-    sys.stdin = codecs.getreader('UTF-8')(sys.stdin)
+  sys.stderr = codecs.getwriter('UTF-8')(sys.stderr)
+  sys.stdout = codecs.getwriter('UTF-8')(sys.stdout)
+  sys.stdin = codecs.getreader('UTF-8')(sys.stdin)
 
 import codecs
 
 class BPE(object):
+
     def __init__(self, codes, separator='@@'):            
+        
         with codecs.open(codes.name, encoding='utf-8') as codes:
             self.bpe_codes = [tuple(item.split()) for item in codes]
          
@@ -42,6 +44,7 @@ class BPE(object):
 
     def segment(self, sentence):
         """segment single sentence (whitespace-tokenized string) with BPE encoding"""
+
         output = []
         for word in sentence.split():
             new_word = encode(word, self.bpe_codes)
@@ -53,16 +56,26 @@ class BPE(object):
         return ' '.join(output)
 
 def create_parser():
-    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
         description="learn BPE-based word segmentation")
-    parser.add_argument('--input', '-i', type=argparse.FileType('r'), default=sys.stdin,
-        metavar='PATH', help="Input file (default: standard input).")
-    parser.add_argument('--codes', '-c', type=argparse.FileType('r'), metavar='PATH',
-        required=True, help="File with BPE codes (created by learn_bpe.py).")
-    parser.add_argument('--output', '-o', type=argparse.FileType('w'), default=sys.stdout,
-        metavar='PATH', help="Output file (default: standard output)")
-    parser.add_argument('--separator', '-s', type=str, default='@@', metavar='STR',
+
+    parser.add_argument(
+        '--input', '-i', type=argparse.FileType('r'), default=sys.stdin,
+        metavar='PATH',
+        help="Input file (default: standard input).")
+    parser.add_argument(
+        '--codes', '-c', type=argparse.FileType('r'), metavar='PATH',
+        required=True,
+        help="File with BPE codes (created by learn_bpe.py).")
+    parser.add_argument(
+        '--output', '-o', type=argparse.FileType('w'), default=sys.stdout,
+        metavar='PATH',
+        help="Output file (default: standard output)")
+    parser.add_argument(
+        '--separator', '-s', type=str, default='@@', metavar='STR',
         help="Separator between non-final subword units (default: '%(default)s'))")
+
     return parser
 
 def get_pairs(word):

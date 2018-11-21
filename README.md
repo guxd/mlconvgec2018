@@ -63,7 +63,7 @@ In the `training/` directory, within the `preprocess.sh` script, place paths to 
       ./train_reranker.sh <output_dir> <gpu-device-number> <models-path> <path-to-moses>
       ```
       `<output-dir>`: directory to store temporary files and final output `weights.txt` file.
-5. Run the trained model from within `training/` directory using the script `run_trained_model.py`.
+5. Run the trained model from within `training/` directory using the script `run_trained_model.sh`.
 
 ## License
 The code and models in this repository are licensed under the GNU General Public License Version 3.
