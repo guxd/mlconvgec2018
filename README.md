@@ -1,6 +1,6 @@
 # A Multilayer Convolutional Encoder-Decoder Neural Network for Grammatical Error Correction
 
-Code and model files for the [paper](https://arxiv.org/abs/1801.08831): "A Multilayer Convolutional Encoder-Decoder Neural Network for Grammatical Error Correction" (In AAAI-18). If you use any part of this work, make sure you include the following citation:
+Code and model files for the [paper](https://www.aaai.org/ocs/index.php/AAAI/AAAI18/paper/viewFile/17308/16137): "A Multilayer Convolutional Encoder-Decoder Neural Network for Grammatical Error Correction" (In AAAI-18). If you use any part of this work, make sure you include the following citation:
 
 ```
 @InProceedings{chollampatt2018mlconv,
@@ -38,7 +38,7 @@ You can also run the script by adding optional arguments for re-ranking
 ```
 ./run.sh <input-file> <output-directory> <gpu-device-number> <models-path> <weights-file> <features>
 ````
- `<wegihts-file>`: path to trained feature weights for the re-ranker (within `models/reranker_weights`
+ `<weights-file>`: path to trained feature weights for the re-ranker (within `models/reranker_weights`
  `<features>`: use 'eo' for edit operation features, and 'eolm' for both edit operations and language model features.
 
 
