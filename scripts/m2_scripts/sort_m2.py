@@ -7,8 +7,7 @@ import argparse
 
 
 def write_to_m2(wlines, fwrite):
-	for line in wlines:
-		fwrite.write(line+'\n')
+	for line in wlines: fwrite.write(line+'\n')
 	fwrite.write('\n')
 
 def collect_lines(filename, outfilename, min_annots=0, out_remaining=False):
@@ -23,22 +22,17 @@ def collect_lines(filename, outfilename, min_annots=0, out_remaining=False):
 			line = line.strip()
 			if line.startswith('S'):
 				lcount += 1
-				if lcount > 1:
-					dataset_lines.append(sent_lines)
+				if lcount > 1: dataset_lines.append(sent_lines)
 				sent_lines = [line]
-			if line.startswith('A'):
-				sent_lines.append(line)
+			if line.startswith('A'): sent_lines.append(line)
 		dataset_lines.append(sent_lines)
 
 	for lines in dataset_lines:
-		if len(lines) == 0:
-			print (line)
+		if len(lines) == 0: print(line)
 	sortedset = sorted(dataset_lines, key=lambda x: (len(x), -len(x[0].split())))
 	for lines in sortedset:
-		if len(lines) - 1 >= min_annots :	# len(lines) = sentence + annots
-			write_to_m2(lines, fwrite)
-		elif out_remaining == True:
-			write_to_m2(lines, fremwrite)
+		if len(lines) - 1 >= min_annots : write_to_m2(lines, fwrite) # len(lines) = sentence + annots
+		elif out_remaining == True: write_to_m2(lines, fremwrite)
 	fwrite.close()
 	fremwrite.close()
 

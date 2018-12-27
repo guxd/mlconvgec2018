@@ -21,17 +21,14 @@ def read_from_m2(filename):
 				lcount += 1
 				#if lcount > int(numlines):
 				#	break
-				if lcount > 1:
-					dataset_lines.append(sent_lines)
+				if lcount > 1: dataset_lines.append(sent_lines)
 				sent_lines = [line]
-			if line.startswith('A'):
-				sent_lines.append(line)
+			if line.startswith('A'): sent_lines.append(line)
 		dataset_lines.append(sent_lines)
 	return dataset_lines
 
 def write_to_m2(wlines, fwrite):
-	for line in wlines:
-		fwrite.write(line+'\n')
+	for line in wlines: fwrite.write(line+'\n')
 	fwrite.write('\n')
 
 
@@ -39,17 +36,14 @@ def get_chunks(l, n):
     nlines = int(len(l)/n)
     chunks = [l[i:i + nlines] for i in range(0, len(l)-len(l)%nlines, nlines)]
     rem = len(l)%nlines
-    if rem > 0:
-        chunks[-1] += l[-rem:]
+    if rem > 0: chunks[-1] += l[-rem:]
     return chunks
 
 def split_lines(filename, outprefix, numparts, shuffle=False):
 
-	# Read from input m2 file
-	dataset_lines = read_from_m2(filename)
+    dataset_lines = read_from_m2(filename) # Read from input m2 file
 
-	if args.shuffle == True:
-		random.shuffle(dataset_lines)
+	if args.shuffle == True: random.shuffle(dataset_lines)
 
 	data_chunks = get_chunks(dataset_lines, numparts)
 
@@ -57,36 +51,28 @@ def split_lines(filename, outprefix, numparts, shuffle=False):
 	for i in range(numparts):
 		fwrites.append(open(outprefix+"."+str(i+1)+".m2",'w'))
 	for i in range(numparts):
-		for lines in data_chunks[i]:
-			write_to_m2(lines, fwrites[i])
+		for lines in data_chunks[i]: write_to_m2(lines, fwrites[i])
 		fwrites[i].close()
 
-def get_lines(filename, outprefix, numlines,  shuffle=False):
-
-	# Read from input m2 file
-	dataset_lines = read_from_m2(filename)
-
-	if args.shuffle == True:
-		random.shuffle(dataset_lines)
+def get_lines(filename, outprefix, numlines, shuffle=False):
+	dataset_lines = read_from_m2(filename) # Read from input m2 file
+	if args.shuffle == True: random.shuffle(dataset_lines)
 
 	# Writing the num. of lines to the m2 file
 	fwrite = open(outprefix+"."+str(numlines)+".m2",'w')
 	# Writing to output file
-	for lines in dataset_lines[:numlines]:
-		write_to_m2(lines, fwrite)
+	for lines in dataset_lines[:numlines]: write_to_m2(lines, fwrite)
 	fwrite.close()
 
 	remaining_numlines = len(dataset_lines) - numlines
 	# Writing the num. of lines to the remaining m2 file
 	fwrite = open(outprefix+"."+str(remaining_numlines)+".m2",'w')
-	for lines in dataset_lines[:numlines]:
-		write_to_m2(lines, fwrite)
+	for lines in dataset_lines[:numlines]: write_to_m2(lines, fwrite)
 	fwrite.close()
 
 	if numlines <= len(dataset_lines):
 		fwrite = open(outprefix+"."+str(remaining_numlines)+".m2",'w')
-		for lines in dataset_lines[numlines:]:
-			write_to_m2(lines, fwrite)
+		for lines in dataset_lines[numlines:]: write_to_m2(lines, fwrite)
 		fwrite.close()
 
 parser = argparse.ArgumentParser()
