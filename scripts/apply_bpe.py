@@ -111,17 +111,14 @@ def encode(orig, bpe_codes, cache={}):
                 i += 1
         new_word = tuple(new_word)
         word = new_word
-        if len(word) == 1:
-            break
-        else:
-            pairs = get_pairs(word)
+        if len(word) == 1: break
+        else: pairs = get_pairs(word)
 
     # don't print end-of-word symbols
-    if word[-1] == '</w>':
-        word = word[:-1]
+    if word[-1] == '</w>': word = word[:-1]
     elif word[-1].endswith('</w>'):
         word = word[:-1] + (word[-1].replace('</w>',''),)
-
+        
     cache[orig] = word
     return word
 

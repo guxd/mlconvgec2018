@@ -24,31 +24,17 @@ from collections import defaultdict, Counter
 from io import open
 argparse.open = open
 
-# python 2/3 compatibility
-if sys.version_info < (3, 0):
-  sys.stderr = codecs.getwriter('UTF-8')(sys.stderr)
-  sys.stdout = codecs.getwriter('UTF-8')(sys.stdout)
-  sys.stdin = codecs.getreader('UTF-8')(sys.stdin)
-
 def create_parser():
     parser = argparse.ArgumentParser(
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        description="learn BPE-based word segmentation")
+        formatter_class=argparse.RawDescriptionHelpFormatter, description="learn BPE-based word segmentation")
 
-    parser.add_argument(
-        '--input', '-i', type=argparse.FileType('r'), default=sys.stdin,
-        metavar='PATH',
-        help="Input text (default: standard input).")
-    parser.add_argument(
-        '--output', '-o', type=argparse.FileType('w'), default=sys.stdout,
-        metavar='PATH',
-        help="Output file for BPE codes (default: standard output)")
-    parser.add_argument(
-        '--symbols', '-s', type=int, default=10000,
-        help="Create this many new symbols (each representing a character n-gram) (default: %(default)s))")
-    parser.add_argument(
-        '--verbose', '-v', action="store_true",
-        help="verbose mode.")
+    parser.add_argument('--input', '-i', type=argparse.FileType('r'), default=sys.stdin,
+        metavar='PATH', help="Input text (default: standard input).")
+    parser.add_argument('--output', '-o', type=argparse.FileType('w'), default=sys.stdout,
+        metavar='PATH', help="Output file for BPE codes (default: standard output)")
+    parser.add_argument('--symbols', '-s', type=int, default=10000,
+                   help="Create this many new symbols (each representing a character n-gram) (default: %(default)s))")
+    parser.add_argument('--verbose', '-v', action="store_true", help="verbose mode.")
 
     return parser
 
@@ -57,13 +43,11 @@ def get_vocabulary(fobj):
     """
     vocab = Counter()
     for line in fobj:
-        for word in line.split():
-            vocab[word] += 1
+        for word in line.split(): vocab[word] += 1
     return vocab
 
 def update_pair_statistics(pair, changed, stats, indices):
     """Minimally update the indices and frequency of symbol pairs
-
     if we merge a pair of symbols, only pairs that overlap with occurrences
     of this pair are affected, and need to be updated.
     """
@@ -72,14 +56,11 @@ def update_pair_statistics(pair, changed, stats, indices):
     first, second = pair
     new_pair = first+second
     for j, word, old_word, freq in changed:
-
         # find all instances of pair, and update frequency/indices around it
         i = 0
         while True:
-            try:
-                i = old_word.index(first, i)
-            except ValueError:
-                break
+            try: i = old_word.index(first, i)
+            except ValueError: break
             if i < len(old_word)-1 and old_word[i+1] == second:
                 if i:
                     prev = old_word[i-1:i+1]
@@ -92,15 +73,12 @@ def update_pair_statistics(pair, changed, stats, indices):
                         stats[nex] -= freq
                         indices[nex][j] -= 1
                 i += 2
-            else:
-                i += 1
+            else: i += 1
 
         i = 0
         while True:
-            try:
-                i = word.index(new_pair, i)
-            except ValueError:
-                break
+            try: i = word.index(new_pair, i)
+            except ValueError: break
             if i:
                 prev = word[i-1:i+1]
                 stats[prev] += freq
@@ -115,20 +93,14 @@ def update_pair_statistics(pair, changed, stats, indices):
 
 def get_pair_statistics(vocab):
     """Count frequency of all symbol pairs, and create index"""
-
-    # data structure of pair frequencies
-    stats = defaultdict(int)
-
-    #index from pairs to words
-    indices = defaultdict(lambda: defaultdict(int))
-
+    stats = defaultdict(int)# data structure of pair frequencies
+    indices = defaultdict(lambda: defaultdict(int))#index from pairs to words
     for i, (word, freq) in enumerate(vocab):
         prev_char = word[0]
         for char in word[1:]:
             stats[prev_char, char] += freq
             indices[prev_char, char][i] += 1
             prev_char = char
-
     return stats, indices
 
 
@@ -139,13 +111,8 @@ def replace_pair(pair, vocab, indices):
     pair_str = pair_str.replace('\\','\\\\')
     changes = []
     pattern = re.compile(r'(?<!\S)' + re.escape(first + ' ' + second) + r'(?!\S)')
-    if sys.version_info < (3, 0):
-        iterator = indices[pair].iteritems()
-    else:
-        iterator = indices[pair].items()
-    for j, freq in iterator:
-        if freq < 1:
-            continue
+    for j, freq in indices[pair].items():
+        if freq < 1: continue
         word, freq = vocab[j]
         new_word = ' '.join(word)
         new_word = pattern.sub(pair_str, new_word)
@@ -158,7 +125,6 @@ def replace_pair(pair, vocab, indices):
 
 def prune_stats(stats, big_stats, threshold):
     """Prune statistics dict for efficiency of max()
-
     The frequency of a symbol pair never increases, so pruning is generally safe
     (until we the most frequent pair is less frequent than a pair we previously pruned)
     big_stats keeps full statistics for when we need to access pruned items
@@ -166,10 +132,8 @@ def prune_stats(stats, big_stats, threshold):
     for item,freq in list(stats.items()):
         if freq < threshold:
             del stats[item]
-            if freq < 0:
-                big_stats[item] += freq
-            else:
-                big_stats[item] = freq
+            if freq < 0: big_stats[item] += freq
+            else: big_stats[item] = freq
 
 if __name__ == '__main__':
 
@@ -185,8 +149,7 @@ if __name__ == '__main__':
     # threshold is inspired by Zipfian assumption, but should only affect speed
     threshold = max(stats.values()) / 10
     for i in range(args.symbols):
-        if stats:
-            most_frequent = max(stats, key=stats.get)
+        if stats: most_frequent = max(stats, key=stats.get)
 
         # we probably missed the best pair because of pruning; go back to full statistics
         if not stats or (i and stats[most_frequent] < threshold):

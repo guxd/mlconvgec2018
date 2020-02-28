@@ -22,18 +22,11 @@ from collections import defaultdict
 from io import open
 argparse.open = open
 
-# python 2/3 compatibility
-if sys.version_info < (3, 0):
-  sys.stderr = codecs.getwriter('UTF-8')(sys.stderr)
-  sys.stdout = codecs.getwriter('UTF-8')(sys.stdout)
-  sys.stdin = codecs.getreader('UTF-8')(sys.stdin)
-
 import codecs
 
 class BPE(object):
 
     def __init__(self, codes, separator='@@'):            
-        
         with codecs.open(codes.name, encoding='utf-8') as codes:
             self.bpe_codes = [tuple(item.split()) for item in codes]
          
@@ -44,7 +37,6 @@ class BPE(object):
 
     def segment(self, sentence):
         """segment single sentence (whitespace-tokenized string) with BPE encoding"""
-
         output = []
         for word in sentence.split():
             new_word = encode(word, self.bpe_codes)
@@ -62,25 +54,20 @@ def create_parser():
 
     parser.add_argument(
         '--input', '-i', type=argparse.FileType('r'), default=sys.stdin,
-        metavar='PATH',
-        help="Input file (default: standard input).")
+        metavar='PATH', help="Input file (default: standard input).")
     parser.add_argument(
         '--codes', '-c', type=argparse.FileType('r'), metavar='PATH',
-        required=True,
-        help="File with BPE codes (created by learn_bpe.py).")
+        required=True, help="File with BPE codes (created by learn_bpe.py).")
     parser.add_argument(
         '--output', '-o', type=argparse.FileType('w'), default=sys.stdout,
-        metavar='PATH',
-        help="Output file (default: standard output)")
+        metavar='PATH', help="Output file (default: standard output)")
     parser.add_argument(
         '--separator', '-s', type=str, default='@@', metavar='STR',
         help="Separator between non-final subword units (default: '%(default)s'))")
-
     return parser
 
 def get_pairs(word):
     """Return set of symbol pairs in a word.
-
     word is represented as tuple of symbols (symbols being variable-length strings)
     """
     pairs = set()
@@ -93,17 +80,14 @@ def get_pairs(word):
 def encode(orig, bpe_codes, cache={}):
     """Encode word based on list of BPE merge operations, which are applied consecutively
     """
-
-    if orig in cache:
-        return cache[orig]
+    if orig in cache: return cache[orig]
 
     word = tuple(orig) + ('</w>',)
     pairs = get_pairs(word)
 
     while True:
         bigram = min(pairs, key = lambda pair: bpe_codes.get(pair, float('inf')))
-        if bigram not in bpe_codes:
-            break
+        if bigram not in bpe_codes: break
         first, second = bigram
         new_word = []
         i = 0
@@ -124,14 +108,11 @@ def encode(orig, bpe_codes, cache={}):
                 i += 1
         new_word = tuple(new_word)
         word = new_word
-        if len(word) == 1:
-            break
-        else:
-            pairs = get_pairs(word)
+        if len(word) == 1: break
+        else: pairs = get_pairs(word)
 
     # don't print end-of-word symbols
-    if word[-1] == '</w>':
-        word = word[:-1]
+    if word[-1] == '</w>': word = word[:-1]
     elif word[-1].endswith('</w>'):
         word = word[:-1] + (word[-1].replace('</w>',''),)
 
